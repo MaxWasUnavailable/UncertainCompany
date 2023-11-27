@@ -11,10 +11,11 @@ namespace UncertainCompany.Patches;
 [HarmonyPatch(typeof(StartOfRound))]
 internal class StartOfRoundPatch
 {
+    private const int TicksBetweenWeatherChanges = 10;
+    private static int _ticksSinceLastWeatherChange;
+
     // ReSharper disable once InconsistentNaming
-    private static readonly Random random = new();
-    private static int _ticksSinceLastWeatherChange = 0;
-    private static readonly int _ticksBetweenWeatherChanges = 10;
+    private static readonly Random _random = new();
 
     /// <summary>
     ///     Patch the <see cref="StartOfRound.SetMapScreenInfoToCurrentLevel" /> method to hide the weather info from the
@@ -37,13 +38,14 @@ internal class StartOfRoundPatch
     [HarmonyPostfix]
     internal static void ScrambleWeatherInfoOnUpdate(ref StartOfRound __instance)
     {
-        if (_ticksSinceLastWeatherChange < _ticksBetweenWeatherChanges + random.Next(0, 10))
+        if (_ticksSinceLastWeatherChange < TicksBetweenWeatherChanges + _random.Next(0, 10))
         {
             _ticksSinceLastWeatherChange++;
             return;
         }
+
         _ticksSinceLastWeatherChange = 0;
-        
+
         __instance.screenLevelDescription.text = Regex.Replace(
             __instance.screenLevelDescription.text, "\nWeather.*", ScrambledWeatherText());
     }
@@ -57,13 +59,13 @@ internal class StartOfRoundPatch
         var output = "\nWeather: ";
 
         var weatherString = Enum.GetValues(typeof(LevelWeatherType)).Cast<LevelWeatherType>().ToArray()[
-            random.Next(0, Enum.GetValues(typeof(LevelWeatherType)).Length)].ToString();
+            _random.Next(0, Enum.GetValues(typeof(LevelWeatherType)).Length)].ToString();
 
         // Scramble the randomWeather string.
         var weatherStringLength = weatherString.Length;
 
         for (var i = 0; i < weatherStringLength; i++)
-            switch (random.Next(0, 5))
+            switch (_random.Next(0, 5))
             {
                 case 0:
                     // Uppercased
@@ -75,11 +77,11 @@ internal class StartOfRoundPatch
                     break;
                 case 2:
                     // Random from the weather string
-                    output += weatherString[random.Next(0, weatherStringLength)];
+                    output += weatherString[_random.Next(0, weatherStringLength)];
                     break;
                 default:
                     // Random from alphanumeric characters
-                    output += (char)random.Next(48, 122);
+                    output += (char)_random.Next(48, 122);
                     break;
             }
 
