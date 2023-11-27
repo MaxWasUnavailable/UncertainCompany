@@ -37,7 +37,7 @@ internal class StartOfRoundPatch
     [HarmonyPostfix]
     internal static void ScrambleWeatherInfoOnUpdate(ref StartOfRound __instance)
     {
-        if (_ticksSinceLastWeatherChange < _ticksBetweenWeatherChanges)
+        if (_ticksSinceLastWeatherChange < _ticksBetweenWeatherChanges + random.Next(0, 10))
         {
             _ticksSinceLastWeatherChange++;
             return;
