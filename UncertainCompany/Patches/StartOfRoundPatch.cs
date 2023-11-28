@@ -26,6 +26,8 @@ internal class StartOfRoundPatch
     [HarmonyPostfix]
     internal static void HideWeatherInfoFromDisplay(ref StartOfRound __instance)
     {
+        if (!UncertainCompany.Instance.DoHideWeather.Value) return;
+
         UpdateScreenLevelDescription(ref __instance);
     }
 
@@ -37,6 +39,8 @@ internal class StartOfRoundPatch
     [HarmonyPostfix]
     internal static void ScrambleWeatherInfoOnUpdate(ref StartOfRound __instance)
     {
+        if (!UncertainCompany.Instance.DoHideWeather.Value) return;
+
         if (_ticksSinceLastWeatherChange < TicksBetweenWeatherChanges + _random.Next(0, 10))
         {
             _ticksSinceLastWeatherChange++;
@@ -44,10 +48,10 @@ internal class StartOfRoundPatch
         }
 
         _ticksSinceLastWeatherChange = 0;
-        
+
         UpdateScreenLevelDescription(ref __instance);
     }
-    
+
     private static void UpdateScreenLevelDescription(ref StartOfRound __instance)
     {
         if (__instance.screenLevelDescription.text.Contains("Weather:"))
