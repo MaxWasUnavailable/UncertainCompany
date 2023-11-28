@@ -129,9 +129,6 @@ internal class TerminalPatch
             if (!OriginalMoonCosts.ContainsKey(compatibleNoun.noun.word))
                 OriginalMoonCosts.Add(compatibleNoun.noun.word, compatibleNoun.result.itemCost);
 
-            // Reset moon cost to original value.
-            compatibleNoun.result.itemCost = OriginalMoonCosts[compatibleNoun.noun.word];
-
             // Ensures at least one originally free moon remains free.
             // Prevents campaign deadlocks.
             if (OriginalMoonCosts[compatibleNoun.noun.word] == 0 && amountOfFreeMoons > 0)
@@ -144,21 +141,17 @@ internal class TerminalPatch
             var moonCost = OriginalMoonCosts[compatibleNoun.noun.word];
 
             // If moon cost is 0, randomly select whether to give it a random initial value to randomise.
-            if (moonCost == 0)
-            {
-                if (random.Next(0, 4) == 0)
-                    moonCost = random.Next(0, MaxFreeMoonCost);
-                else
-                    continue;
-            }
+            if (moonCost == 0 && random.Next(0, 4) == 0)
+                moonCost = random.Next(0, MaxFreeMoonCost);
 
             // Randomise moon cost.
             moonCost = GetRandomisedMoonPrice(random, moonCost);
 
+            // Set the price of the decision node to the new moon cost.
             compatibleNoun.result.itemCost = moonCost;
 
-            // Set the price of the confirm option to the new moon cost.
-            // Vanilla has the same price set for both the decision and confirm nodes.
+            // Set the price of the confirm node to the new moon cost.
+            // Vanilla has the same price set for both the decision and confirm nodes, hence why we do this.
             foreach (var compatibleNoun2 in compatibleNoun.result.terminalOptions)
                 if (compatibleNoun2.noun.word.ToLower() == "confirm")
                     compatibleNoun2.result.itemCost = moonCost;
