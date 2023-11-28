@@ -17,6 +17,7 @@ internal class TerminalPatch
     ///     Patch the <see cref="Terminal.Awake" /> method to set all moon TerminalNodes' displayPlanetInfo to -1 & remove
     ///     [currentPlanetTime] from the different compatible nouns.
     /// </summary>
+    /// <param name="__instance"> The <see cref="Terminal" /> instance. </param>
     [HarmonyPatch("Awake")]
     [HarmonyPostfix]
     [HarmonyPriority(Priority.Last)]
@@ -45,6 +46,7 @@ internal class TerminalPatch
     /// <summary>
     ///     Patch the <see cref="Terminal.Awake" /> method to remove [currentPlanetTime] from the moons command.
     /// </summary>
+    /// <param name="__instance"> The <see cref="Terminal" /> instance. </param>
     [HarmonyPatch("Awake")]
     [HarmonyPostfix]
     [HarmonyPriority(Priority.Last)]
@@ -61,6 +63,10 @@ internal class TerminalPatch
         __instance.terminalNodes.allKeywords = keywordsList.ToArray();
     }
 
+    /// <summary>
+    ///     Patch the <see cref="Terminal.SetItemSales" /> method to randomise moon travel prices.
+    /// </summary>
+    /// <param name="__instance"> The <see cref="Terminal" /> instance. </param>
     [HarmonyPatch("SetItemSales")]
     [HarmonyPostfix]
     [HarmonyPriority(Priority.Last)]
