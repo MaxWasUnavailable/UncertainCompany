@@ -46,8 +46,11 @@ internal class StartOfRoundPatch
 
         _ticksSinceLastWeatherChange = 0;
 
-        __instance.screenLevelDescription.text = Regex.Replace(
-            __instance.screenLevelDescription.text, "\nWeather.*", ScrambledWeatherText());
+        if (__instance.screenLevelDescription.text.Contains("Weather:"))
+            __instance.screenLevelDescription.text = Regex.Replace(
+                __instance.screenLevelDescription.text, "Weather.*", ScrambledWeatherText());
+        else
+            __instance.screenLevelDescription.text += ScrambledWeatherText();
     }
 
     /// <summary>
@@ -56,7 +59,7 @@ internal class StartOfRoundPatch
     /// <returns> The scrambled weather text. </returns>
     private static string ScrambledWeatherText()
     {
-        var output = "\nWeather: ";
+        var output = "Weather: ";
 
         var weatherString = Enum.GetValues(typeof(LevelWeatherType)).Cast<LevelWeatherType>().ToArray()[
             _random.Next(0, Enum.GetValues(typeof(LevelWeatherType)).Length)].ToString();
