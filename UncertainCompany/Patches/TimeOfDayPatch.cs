@@ -13,22 +13,29 @@ internal class TimeOfDayPatch
     private const float MaxBuyingRateSubtraction = 0.20f;
 
     // ReSharper disable once InconsistentNaming
-    private static readonly Random _random = new();
+    private static Random _random;
 
     /// <summary>
     ///     Patch the <see cref="TimeOfDay.SetBuyingRateForDay" /> method to randomise the buying rate.
     /// </summary>
     /// <param name="__instance"> The <see cref="TimeOfDay" /> instance. </param>
-    [HarmonyPatch(nameof(TimeOfDay.SetBuyingRateForDay))]
+    [HarmonyPatch("SetBuyingRateForDay")]
     [HarmonyPostfix]
     internal static void RandomiseBuyingRate(ref TimeOfDay __instance)
     {
+        if (_random == null)
+        {
+            _random = new Random(StartOfRound.Instance.randomMapSeed);
+        }
+        
         var buyingRateChange = _random.NextDouble() switch
         {
             < 0.5 => _random.NextDouble() * MaxBuyingRateAddition,
             _ => _random.NextDouble() * MaxBuyingRateSubtraction * -1
         };
 
-        StartOfRound.Instance.companyBuyingRate += (float)buyingRateChange;
+        buyingRateChange *= 100;
+
+        StartOfRound.Instance.companyBuyingRate += (float) buyingRateChange;
     }
 }
