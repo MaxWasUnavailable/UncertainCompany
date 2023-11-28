@@ -72,11 +72,11 @@ internal class TerminalPatch
         {
             if (__instance.itemSalesPercentages[itemIndex] == 100) continue;
 
-            __instance.itemSalesPercentages[itemIndex] += GetItemSaleOffset(random);
+            __instance.itemSalesPercentages[itemIndex] += GetRandomItemSaleOffset(random);
         }
     }
 
-    private static int GetItemSaleOffset(Random random)
+    private static int GetRandomItemSaleOffset(Random random)
     {
         var buyingRateChange = random.Next(0, 2) switch
         {
