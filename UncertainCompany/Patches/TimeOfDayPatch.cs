@@ -21,13 +21,13 @@ internal class TimeOfDayPatch
     internal static void RandomiseBuyingRate(ref TimeOfDay __instance)
     {
         var random = new Random(StartOfRound.Instance.randomMapSeed);
-        
+
         var buyingRateChange = random.Next(0, 2) switch
         {
             0 => random.NextDouble() * MaxBuyingRateAddition,
             _ => random.NextDouble() * -MaxBuyingRateSubtraction
         };
 
-        StartOfRound.Instance.companyBuyingRate += (float) buyingRateChange;
+        StartOfRound.Instance.companyBuyingRate += (float)buyingRateChange;
     }
 }
