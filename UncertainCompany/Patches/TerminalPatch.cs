@@ -28,6 +28,8 @@ internal class TerminalPatch
     [HarmonyPriority(Priority.Last)]
     internal static void HideMoonWeatherInfoFromRouteCommand(ref Terminal __instance)
     {
+        if (!UncertainCompany.Instance.DoHideWeather.Value) return;
+        
         var keywordsList = __instance.terminalNodes.allKeywords.ToList();
 
         var routeKeyword = keywordsList.Find(keyword => keyword.word == "route");
@@ -57,6 +59,8 @@ internal class TerminalPatch
     [HarmonyPriority(Priority.Last)]
     internal static void HideMoonWeatherInfoFromMoonsCommand(ref Terminal __instance)
     {
+        if (!UncertainCompany.Instance.DoHideWeather.Value) return;
+        
         var keywordsList = __instance.terminalNodes.allKeywords.ToList();
 
         var moonKeyword = keywordsList.Find(keyword => keyword.word == "moons");
@@ -77,6 +81,8 @@ internal class TerminalPatch
     [HarmonyPriority(Priority.Last)]
     internal static void RandomiseItemSales(ref Terminal __instance)
     {
+        if (!UncertainCompany.Instance.DoRandomiseItemSales.Value) return;
+        
         var random = new Random(StartOfRound.Instance.randomMapSeed);
 
         for (var itemIndex = 0; itemIndex < __instance.itemSalesPercentages.Length; itemIndex++)
@@ -107,6 +113,8 @@ internal class TerminalPatch
     [HarmonyPriority(Priority.Last)]
     internal static void RandomiseMoonTravelPrices(ref Terminal __instance)
     {
+        if (!UncertainCompany.Instance.DoRandomiseTravelCost.Value) return;
+        
         var random = new Random(StartOfRound.Instance.randomMapSeed);
 
         var keywordsList = __instance.terminalNodes.allKeywords.ToList();

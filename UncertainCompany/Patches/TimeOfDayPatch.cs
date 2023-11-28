@@ -20,6 +20,8 @@ internal class TimeOfDayPatch
     [HarmonyPostfix]
     internal static void RandomiseBuyingRate(ref TimeOfDay __instance)
     {
+        if (!UncertainCompany.Instance.DoRandomiseSellPrice.Value) return;
+        
         var random = new Random(StartOfRound.Instance.randomMapSeed);
 
         var buyingRateChange = random.Next(0, 2) switch
