@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 
@@ -12,6 +13,10 @@ internal class TerminalPatch
 {
     private const double MaxItemSaleAddition = 0.30;
     private const double MaxItemSaleSubtraction = 0.10;
+    private const double MaxMoonCostAddition = 0.25;
+    private const double MaxMoonCostSubtraction = 0.25;
+    private const int Max0MoonCost = 200;
+    private static readonly Dictionary<string, int> OriginalMoonCosts = new();
 
     /// <summary>
     ///     Patch the <see cref="Terminal.Awake" /> method to set all moon TerminalNodes' displayPlanetInfo to -1 & remove
@@ -91,5 +96,74 @@ internal class TerminalPatch
         };
 
         return (int)(buyingRateChange * 100);
+    }
+
+    /// <summary>
+    ///     Patch the <see cref="Terminal.SetItemSales" /> method to randomise moon travel prices.
+    /// </summary>
+    /// <param name="__instance"> The <see cref="Terminal" /> instance. </param>
+    [HarmonyPatch("SetItemSales")]
+    [HarmonyPostfix]
+    [HarmonyPriority(Priority.Last)]
+    internal static void RandomiseMoonTravelPrices(ref Terminal __instance)
+    {
+        var random = new Random(StartOfRound.Instance.randomMapSeed);
+
+        var keywordsList = __instance.terminalNodes.allKeywords.ToList();
+
+        var routeKeyword = keywordsList.Find(keyword => keyword.word == "route");
+
+        var amountOfFreeMoons = OriginalMoonCosts.Values.Count > 0
+            ? OriginalMoonCosts.Values.Count(moonCost => moonCost == 0)
+            : routeKeyword.compatibleNouns.Count(compatibleNoun => compatibleNoun.result.itemCost == 0);
+
+        // Loop through all route's compatible nouns.
+
+        foreach (var compatibleNoun in routeKeyword.compatibleNouns)
+        {
+            if (compatibleNoun.result.displayText.ToLower().Contains("company")) continue;
+
+            if (!OriginalMoonCosts.ContainsKey(compatibleNoun.noun.word))
+                OriginalMoonCosts.Add(compatibleNoun.noun.word, compatibleNoun.result.itemCost);
+
+            if (OriginalMoonCosts[compatibleNoun.noun.word] == 0 && amountOfFreeMoons > 0)
+                if (random.Next(0, 2) == 0 || amountOfFreeMoons == 1)
+                {
+                    amountOfFreeMoons = -1;
+                    continue;
+                }
+
+            var moonCost = OriginalMoonCosts[compatibleNoun.noun.word];
+
+            if (moonCost == 0)
+            {
+                if (random.Next(0, 5) == 0)
+                    moonCost = random.Next(0, Max0MoonCost);
+                else
+                    continue;
+            }
+
+            moonCost = GetRandomisedMoonPrice(random, moonCost);
+
+            compatibleNoun.result.itemCost = moonCost;
+
+            foreach (var compatibleNoun2 in compatibleNoun.result.terminalOptions)
+                if (compatibleNoun2.noun.word == "confirm")
+                    compatibleNoun2.result.itemCost = moonCost;
+        }
+
+        // Update original keywords.
+        __instance.terminalNodes.allKeywords = keywordsList.ToArray();
+    }
+
+    private static int GetRandomisedMoonPrice(Random random, int originalPrice)
+    {
+        var buyingRateChange = random.Next(0, 2) switch
+        {
+            0 => random.NextDouble() * MaxMoonCostAddition,
+            _ => random.NextDouble() * -MaxMoonCostSubtraction
+        };
+
+        return (int)(originalPrice * (1 + buyingRateChange));
     }
 }
