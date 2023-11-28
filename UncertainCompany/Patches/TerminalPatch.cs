@@ -15,7 +15,7 @@ internal class TerminalPatch
     private const double MaxItemSaleSubtraction = 0.10;
     private const double MaxMoonCostAddition = 0.25;
     private const double MaxMoonCostSubtraction = 0.25;
-    private const int Max0MoonCost = 200;
+    private const int MaxFreeMoonCost = 200;
     private static readonly Dictionary<string, int> OriginalMoonCosts = new();
 
     /// <summary>
@@ -128,7 +128,7 @@ internal class TerminalPatch
             // This ensures we can always revert back to the original moon cost.
             if (!OriginalMoonCosts.ContainsKey(compatibleNoun.noun.word))
                 OriginalMoonCosts.Add(compatibleNoun.noun.word, compatibleNoun.result.itemCost);
-            
+
             // Reset moon cost to original value.
             compatibleNoun.result.itemCost = OriginalMoonCosts[compatibleNoun.noun.word];
 
@@ -140,14 +140,14 @@ internal class TerminalPatch
                     amountOfFreeMoons = -1;
                     continue;
                 }
-            
+
             var moonCost = OriginalMoonCosts[compatibleNoun.noun.word];
 
             // If moon cost is 0, randomly select whether to give it a random initial value to randomise.
             if (moonCost == 0)
             {
-                if (random.Next(0, 5) == 0)
-                    moonCost = random.Next(0, Max0MoonCost);
+                if (random.Next(0, 4) == 0)
+                    moonCost = random.Next(0, MaxFreeMoonCost);
                 else
                     continue;
             }
