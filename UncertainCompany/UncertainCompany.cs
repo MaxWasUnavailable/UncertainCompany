@@ -9,7 +9,7 @@ namespace UncertainCompany
     {
         private bool _isPatched;
         private Harmony Harmony { get; set; }
-        internal new static ManualLogSource Logger { get; set; }
+        private new static ManualLogSource Logger { get; set; }
         public static UncertainCompany Instance { get; private set; }
 
         private void Awake()
