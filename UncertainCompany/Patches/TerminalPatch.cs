@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using HarmonyLib;
 
@@ -9,6 +10,9 @@ namespace UncertainCompany.Patches;
 [HarmonyPatch(typeof(Terminal))]
 internal class TerminalPatch
 {
+    private const double MaxItemSaleAddition = 0.30;
+    private const double MaxItemSaleSubtraction = 0.10;
+
     /// <summary>
     ///     Patch the <see cref="Terminal.Awake" /> method to set all moon TerminalNodes' displayPlanetInfo to -1 & remove
     ///     [currentPlanetTime] from the different compatible nouns.
@@ -55,5 +59,31 @@ internal class TerminalPatch
 
         // Update original keywords.
         __instance.terminalNodes.allKeywords = keywordsList.ToArray();
+    }
+
+    [HarmonyPatch("SetItemSales")]
+    [HarmonyPostfix]
+    [HarmonyPriority(Priority.Last)]
+    internal static void RandomiseItemSales(ref Terminal __instance)
+    {
+        var random = new Random(StartOfRound.Instance.randomMapSeed);
+
+        for (var itemIndex = 0; itemIndex < __instance.itemSalesPercentages.Length; itemIndex++)
+        {
+            if (__instance.itemSalesPercentages[itemIndex] == 100) continue;
+
+            __instance.itemSalesPercentages[itemIndex] += GetItemSaleOffset(random);
+        }
+    }
+
+    private static int GetItemSaleOffset(Random random)
+    {
+        var buyingRateChange = random.Next(0, 2) switch
+        {
+            0 => random.NextDouble() * MaxItemSaleAddition,
+            _ => random.NextDouble() * -MaxItemSaleSubtraction
+        };
+
+        return (int)(buyingRateChange * 100);
     }
 }
