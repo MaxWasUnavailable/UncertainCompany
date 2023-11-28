@@ -121,20 +121,29 @@ internal class TerminalPatch
 
         foreach (var compatibleNoun in routeKeyword.compatibleNouns)
         {
+            // Skip the Company
             if (compatibleNoun.result.displayText.ToLower().Contains("company")) continue;
 
+            // Add original moon cost to dictionary if key doesn't exist.
+            // This ensures we can always revert back to the original moon cost.
             if (!OriginalMoonCosts.ContainsKey(compatibleNoun.noun.word))
                 OriginalMoonCosts.Add(compatibleNoun.noun.word, compatibleNoun.result.itemCost);
+            
+            // Reset moon cost to original value.
+            compatibleNoun.result.itemCost = OriginalMoonCosts[compatibleNoun.noun.word];
 
+            // Ensures at least one originally free moon remains free.
+            // Prevents campaign deadlocks.
             if (OriginalMoonCosts[compatibleNoun.noun.word] == 0 && amountOfFreeMoons > 0)
                 if (random.Next(0, 2) == 0 || amountOfFreeMoons == 1)
                 {
                     amountOfFreeMoons = -1;
                     continue;
                 }
-
+            
             var moonCost = OriginalMoonCosts[compatibleNoun.noun.word];
 
+            // If moon cost is 0, randomly select whether to give it a random initial value to randomise.
             if (moonCost == 0)
             {
                 if (random.Next(0, 5) == 0)
@@ -143,12 +152,15 @@ internal class TerminalPatch
                     continue;
             }
 
+            // Randomise moon cost.
             moonCost = GetRandomisedMoonPrice(random, moonCost);
 
             compatibleNoun.result.itemCost = moonCost;
 
+            // Set the price of the confirm option to the new moon cost.
+            // Vanilla has the same price set for both the decision and confirm nodes.
             foreach (var compatibleNoun2 in compatibleNoun.result.terminalOptions)
-                if (compatibleNoun2.noun.word == "confirm")
+                if (compatibleNoun2.noun.word.ToLower() == "confirm")
                     compatibleNoun2.result.itemCost = moonCost;
         }
 
