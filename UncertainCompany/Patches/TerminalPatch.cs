@@ -129,20 +129,24 @@ internal class TerminalPatch
             if (!OriginalMoonCosts.ContainsKey(compatibleNoun.noun.word))
                 OriginalMoonCosts.Add(compatibleNoun.noun.word, compatibleNoun.result.itemCost);
 
+            var moonCost = OriginalMoonCosts[compatibleNoun.noun.word];
+
+            // If moon cost is 0, randomly select whether to give it a random initial value to randomise.
+            if (moonCost == 0 && random.Next(0, 4) == 0)
+                moonCost = random.Next(0, MaxFreeMoonCost);
+
             // Ensures at least one originally free moon remains free.
             // Prevents campaign deadlocks.
             if (OriginalMoonCosts[compatibleNoun.noun.word] == 0 && amountOfFreeMoons > 0)
                 if (random.Next(0, 2) == 0 || amountOfFreeMoons == 1)
                 {
                     amountOfFreeMoons = -1;
-                    continue;
+                    moonCost = 0;
                 }
-
-            var moonCost = OriginalMoonCosts[compatibleNoun.noun.word];
-
-            // If moon cost is 0, randomly select whether to give it a random initial value to randomise.
-            if (moonCost == 0 && random.Next(0, 4) == 0)
-                moonCost = random.Next(0, MaxFreeMoonCost);
+                else
+                {
+                    amountOfFreeMoons--;
+                }
 
             // Randomise moon cost.
             moonCost = GetRandomisedMoonPrice(random, moonCost);
