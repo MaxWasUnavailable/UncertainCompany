@@ -26,8 +26,7 @@ internal class StartOfRoundPatch
     [HarmonyPostfix]
     internal static void HideWeatherInfoFromDisplay(ref StartOfRound __instance)
     {
-        __instance.screenLevelDescription.text = Regex.Replace(
-            __instance.screenLevelDescription.text, "\nWeather.*", ScrambledWeatherText());
+        UpdateScreenLevelDescription(ref __instance);
     }
 
     /// <summary>
@@ -45,7 +44,12 @@ internal class StartOfRoundPatch
         }
 
         _ticksSinceLastWeatherChange = 0;
-
+        
+        UpdateScreenLevelDescription(ref __instance);
+    }
+    
+    private static void UpdateScreenLevelDescription(ref StartOfRound __instance)
+    {
         if (__instance.screenLevelDescription.text.Contains("Weather:"))
         {
             __instance.screenLevelDescription.text = Regex.Replace(
