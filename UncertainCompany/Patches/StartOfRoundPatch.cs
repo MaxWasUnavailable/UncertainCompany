@@ -47,10 +47,15 @@ internal class StartOfRoundPatch
         _ticksSinceLastWeatherChange = 0;
 
         if (__instance.screenLevelDescription.text.Contains("Weather:"))
+        {
             __instance.screenLevelDescription.text = Regex.Replace(
                 __instance.screenLevelDescription.text, "Weather.*", ScrambledWeatherText());
+        }
         else
+        {
+            if (!__instance.screenLevelDescription.text.EndsWith("\n")) __instance.screenLevelDescription.text += "\n";
             __instance.screenLevelDescription.text += ScrambledWeatherText();
+        }
     }
 
     /// <summary>
