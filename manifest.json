@@ -1,0 +1,7 @@
+{
+  "name": "Uncertain Company",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/MaxWasUnavailable/UncertainCompany",
+  "description": "Adds an air of uncertainty to Lethal Company... Are you prepared?",
+  "dependencies": ["BepInEx-BepInExPack-5.4.2100"]
+}
